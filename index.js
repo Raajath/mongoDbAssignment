@@ -1,71 +1,41 @@
 const mongoose =require('mongoose');
 const User=require('./userSchema');
 
-// can use async or then method
-mongoose.connect('mongodb://localhost/testDb')
-    .then(() => {
-      console.log('Connected successfully');
-    })
-    .catch((error) => {
-      console.error('Error occurred while connecting:', error);
-    });
+
+async function connectDb(url) {
+  try {
+    await mongoose.connect(url);
+    return 'sucessful';
+  } catch (e) {
+    console.log(e.message);
+    return 'Failed to Eatablish Connection';
+  }
+}
 
 
-async function InsertValues() {
+async function InsertValues(name, age, email, hobbies, street, city) {
   try {
     /* Alternate
 const user=new User({name:"Rajath",age:21});
 user.save().then(()=>console.log("user saved"));
     */
-    const user1=await User.create({
-      name: 'goyal',
-      age: 26,
-      email: 'rma@gmailsd.com',
-      hobbies: ['dance', 'music'],
+    const user=await User.create({
+      name: name,
+      age: age,
+      email: email,
+      hobbies: hobbies,
       address: {
-        street: 'c Street',
-        city: 'mangalore',
+        street: street,
+        city: city,
       },
     });
-    console.log(user1);
-    const user2=await User.create({
-      name: 'sam',
-      age: 34,
-      email: 'sam@gmail.com',
-      hobbies: ['dance', 'music', 'test'],
-      address: {
-        street: 'c Street',
-        city: 'delhi',
-      },
-    });
-    console.log(user2);
-    const user3=await User.create({
-      name: 'arjun',
-      age: 40,
-      email: 'arj@gmailsd.com',
-      hobbies: ['dance', 'music'],
-      address: {
-        street: 'c Street',
-        city: 'bangalore',
-      },
-    });
-    console.log(user3);
-    const user4=await User.create({
-      name: 'prakash',
-      age: 34,
-      email: 'prakash@gmailsd.com',
-      hobbies: ['dance', 'eat'],
-      address: {
-        street: 'c Street',
-        city: 'bombay',
-      },
-    });
-    console.log(user4);
+    console.log(user);
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed to insert Value';
   }
 }
-InsertValues();
 
 
 async function readByName(name) {
@@ -75,21 +45,24 @@ async function readByName(name) {
     const findData=await User.where('name').equals(name);
     console.log(findData);
     // const ele= await User.find({name:'Rajath'}) Alternate
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed to radByName';
   }
 }
-readByName('arjun');
+
 
 async function readById(id) {
   try {
     const data=await User.findById(id).select('name');
     console.log(data);
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed to readById';
   }
 }
-readById('65d45cc2933cd6449aff681d');
 
 
 async function updateAgeBasedOnName(name, updatedAge) {
@@ -97,22 +70,26 @@ async function updateAgeBasedOnName(name, updatedAge) {
     // use update Many to update many entries
     const updatedResult= await User.updateOne({name: name}, {$set: {age: updatedAge}});
     console.log(updatedResult);
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed to update age based on name';
   }
 }
-updateAgeBasedOnName('Rajath', 30);
+
 
 async function deleteBasedOnName(name) {
   // can use delete many
   try {
     const res=await User.deleteMany({name: name});
     console.log(res);
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed to delete';
   }
 }
-deleteBasedOnName('tr');
+
 
 async function tryMyMethods() {
   try {
@@ -126,10 +103,25 @@ async function tryMyMethods() {
     const m3=await User.find().findName('arjun');
     // here after find() extra filtering findName is used
     console.log(m3);
+    return 'sucessful';
   } catch (e) {
     console.log(e.message);
+    return 'failed as some methods did not work';
   }
 }
-tryMyMethods();
 
+
+async function closeDbConnection() {
+  try {
+    await mongoose.disconnect();
+    return 'sucessful';
+  } catch (e) {
+    console.log( e.message);
+    return 'failed to disconnect';
+  }
+}
+
+
+module.exports={connectDb, readByName, readById, InsertValues,
+  updateAgeBasedOnName, deleteBasedOnName, tryMyMethods, closeDbConnection};
 
